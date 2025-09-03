@@ -251,7 +251,7 @@ export class ChatGPTApi implements LLMApi {
         // (https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/reasoning?tabs=python-secure#markdown-output)
         requestPayload["messages"].unshift({
           role: "developer",
-          content: "Formatting re-enabled",
+          content: "Formatting re-enabled - please enclose code blocks with appropriate markdown tags.",
         });
 
         // o1/o3 uses max_completion_tokens to control the number of tokens (https://platform.openai.com/docs/guides/reasoning#controlling-costs)
