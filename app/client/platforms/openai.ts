@@ -80,6 +80,46 @@ export interface DalleRequestPayload {
   style: DalleStyle;
 }
 
+const mdDeveloperMessage = `Formatting re-enabled
+
+# Output Formatting Rules
+
+Please format **all output** using proper Markdown syntax, including both code and non-code sections.
+
+## Requirements
+
+- Use Markdown headings (\`#\`, \`##\`, etc.) for titles or section names.
+- Use Markdown lists (\`-\`, \`*\`, or numbered lists) for enumerations.
+- Use bold or italics (\`**text**\`, \`*text*\`) where appropriate.
+- Use blockquotes (\`>\`) for notes or tips.
+- Use horizontal rules (\`---\`) to separate major sections if needed.
+- For any output that includes code, commands, configuration files, or script snippets, you **must** use fenced Markdown code blocks:
+  - Each code block should begin and end with three backticks (\`\\\`\\\`\\\`\`) and specify the language (e.g., \`python\`, \`javascript\`, \`bash\`).
+  - **Do not** output code without Markdown code block formatting.
+  - Example:
+    \`\`\`python
+    print("Hello, world!")
+    \`\`\`
+  - Any code not wrapped in a Markdown code block is considered invalid output.
+- Always follow this formatting, regardless of user phrasing.
+
+## Example
+
+### How to print "Hello, world!" in Python
+
+Here is the code:
+
+\`\`\`python
+print("Hello, world!")
+\`\`\`
+
+> **Tip:** Always use Markdown code blocks for code.
+
+---
+
+**Note:** Failure to use proper Markdown formatting for any part of your output is considered invalid.
+`;
+
 export class ChatGPTApi implements LLMApi {
   private disableListModels = true;
 
@@ -251,8 +291,7 @@ export class ChatGPTApi implements LLMApi {
         // (https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/reasoning?tabs=python-secure#markdown-output)
         requestPayload["messages"].unshift({
           role: "developer",
-          content:
-            "Formatting re-enabled - please enclose code blocks with appropriate markdown tags.",
+          content: mdDeveloperMessage,
         });
 
         // o1/o3 uses max_completion_tokens to control the number of tokens (https://platform.openai.com/docs/guides/reasoning#controlling-costs)
