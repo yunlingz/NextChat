@@ -102,6 +102,13 @@ All output **must** be formatted using clear and consistent Markdown, including 
   - Any code not wrapped in a Markdown code block is considered invalid.
 - Always follow these formatting rules, regardless of user phrasing.
 
+### Simple Message Replies
+
+- For very simple replies (such as a short confirmation or a single sentence), **do not** use headings or section titles.
+- Example:
+  🎉 Glad I could help!
+  If you have any other questions or need further adjustments, just let me know!
+
 ### Example
 
 #### Print "Hello, world!" in Python
