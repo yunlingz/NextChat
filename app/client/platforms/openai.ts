@@ -81,43 +81,40 @@ export interface DalleRequestPayload {
 }
 
 const mdDeveloperMessage = `Formatting re-enabled
+## Output Formatting Guidelines
 
-# Output Formatting Rules
+All output **must** be formatted using clear and consistent Markdown, including both code and non-code sections.
 
-Please format **all output** using proper Markdown syntax, including both code and non-code sections.
+### Markdown Requirements
 
-## Requirements
-
-- Use Markdown headings (\`#\`, \`##\`, etc.) for titles or section names.
+- Use appropriate Markdown headings (\`##\`, \`###\`, etc.) for section titles. Avoid oversized top-level headings.
 - Use Markdown lists (\`-\`, \`*\`, or numbered lists) for enumerations.
-- Use bold or italics (\`**text**\`, \`*text*\`) where appropriate.
-- Use blockquotes (\`>\`) for notes or tips.
-- Use horizontal rules (\`---\`) to separate major sections if needed.
-- For any output that includes code, commands, configuration files, or script snippets, you **must** use fenced Markdown code blocks:
-  - Each code block should begin and end with three backticks (\`\\\`\\\`\\\`\`) and specify the language (e.g., \`python\`, \`javascript\`, \`bash\`).
-  - **Do not** output code without Markdown code block formatting.
+- Use **bold** or *italic* for emphasis where needed.
+- Use blockquotes (\`>\`) only for genuine notes, tips, or warnings.
+- Use horizontal rules (\`---\`) to separate major sections when it improves clarity.
+- For any code, commands, configuration files, or script snippets, always use fenced code blocks with a specified language:
+  - Each code block must start and end with three backticks (\`\\\`\\\`\\\`\`) and include the language (e.g., \`python\`, \`javascript\`, \`bash\`).
+  - **Never** output code outside of a Markdown code block.
   - Example:
     \`\`\`python
     print("Hello, world!")
     \`\`\`
-  - Any code not wrapped in a Markdown code block is considered invalid output.
-- Always follow this formatting, regardless of user phrasing.
+  - Any code not wrapped in a Markdown code block is considered invalid.
+- Always follow these formatting rules, regardless of user phrasing.
 
-## Example
+### Example
 
-### How to print "Hello, world!" in Python
-
-Here is the code:
+#### Print "Hello, world!" in Python
 
 \`\`\`python
 print("Hello, world!")
 \`\`\`
 
-> **Tip:** Always use Markdown code blocks for code.
+**Tip:** Always use fenced code blocks for code.
 
 ---
 
-**Note:** Failure to use proper Markdown formatting for any part of your output is considered invalid.
+**Note:** Any output that does not follow these Markdown formatting rules is considered invalid.
 `;
 
 export class ChatGPTApi implements LLMApi {
@@ -286,14 +283,6 @@ export class ChatGPTApi implements LLMApi {
         // Add max_completion_tokens (or max_completion_tokens if that's what you meant)
         requestPayload["max_completion_tokens"] = modelConfig.max_tokens;
       } else if (isO1OrO3) {
-        // by default the o1/o3 models will not attempt to produce output that includes markdown formatting
-        // manually add "Formatting re-enabled" developer message to encourage markdown inclusion in model responses
-        // (https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/reasoning?tabs=python-secure#markdown-output)
-        requestPayload["messages"].unshift({
-          role: "developer",
-          content: mdDeveloperMessage,
-        });
-
         // o1/o3 uses max_completion_tokens to control the number of tokens (https://platform.openai.com/docs/guides/reasoning#controlling-costs)
         requestPayload["max_completion_tokens"] = modelConfig.max_tokens;
       }
@@ -301,6 +290,16 @@ export class ChatGPTApi implements LLMApi {
       // add max_tokens to vision model
       if (visionModel && !isO1OrO3 && !isGpt5) {
         requestPayload["max_tokens"] = Math.max(modelConfig.max_tokens, 4000);
+      }
+
+      if (isO1OrO3) {
+        // by default the o1/o3 models will not attempt to produce output that includes markdown formatting
+        // manually add "Formatting re-enabled" developer message to encourage markdown inclusion in model responses
+        // (https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/reasoning?tabs=python-secure#markdown-output)
+        requestPayload["messages"].unshift({
+          role: "developer",
+          content: mdDeveloperMessage,
+        });
       }
 
       if (isO1OrO3 || isGpt5) {
