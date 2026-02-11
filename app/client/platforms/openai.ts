@@ -316,7 +316,9 @@ export class ChatGPTApi implements LLMApi {
         content: developerMessage,
       });
       // ---
-      requestPayload["reasoning_effort"] = "high";
+      if (isO1OrO3) {
+        requestPayload["reasoning_effort"] = "high";
+      }
     }
 
     console.log("[Request] openai payload: ", requestPayload);
