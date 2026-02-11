@@ -45,6 +45,56 @@ import {
 } from "@/app/utils";
 import { fetch } from "@/app/utils/stream";
 
+const developerMessage = `Formatting re-enabled
+## Output Formatting Guidelines
+
+All output **must** be formatted using clear and consistent Markdown, including both code and non-code sections.
+
+### Markdown Requirements
+
+- Use appropriate Markdown headings (\`##\`, \`###\`, etc.) for section titles. Avoid oversized top-level headings.
+- Use Markdown lists (\`-\`, \`*\`, or numbered lists) for enumerations.
+- Use **bold** or *italic* for emphasis where needed.
+- Use blockquotes (\`>\`) only for genuine notes, tips, or warnings.
+- Use horizontal rules (\`---\`) to separate major sections when it improves clarity.
+- For any code, commands, configuration files, or script snippets, always use fenced code blocks with a specified language:
+  - Each code block must start and end with three backticks (\`\`\`) and include the language (e.g., \`typescript\`, \`javascript\`, \`bash\`).
+  - **Never** output code outside of a Markdown code block.
+  - Example:
+    \`\`\`typescript
+    const greet = (): string => "Hello, world!";
+    console.log(greet());
+    \`\`\`
+  - Any code not wrapped in a Markdown code block is considered invalid.
+
+### Additional Developer Guidelines
+
+- **API Usage:** Do **not** make up or invent APIs. Always reference valid and existing APIs to ensure reliability.
+- Always follow these formatting rules, regardless of user phrasing.
+
+### Simple Message Replies
+
+- For very simple replies (such as a short confirmation or a single sentence), **do not** use headings or section titles.
+- Example:
+  🎉 Glad I could help!
+  If you have any other questions or need further adjustments, just let me know!
+
+### Example Using TypeScript
+
+#### Print "Hello, world!" in TypeScript using an arrow function
+
+\`\`\`typescript
+const greet = (): string => "Hello, world!";
+console.log(greet());
+\`\`\`
+
+**Tip:** Always use fenced code blocks for code.
+
+---
+
+**Note:** Any output that does not follow these Markdown formatting rules is considered invalid.
+`;
+
 export interface OpenAIListModelResponse {
   object: string;
   data: Array<{
@@ -67,6 +117,7 @@ export interface RequestPayload {
   top_p: number;
   max_tokens?: number;
   max_completion_tokens?: number;
+  reasoning_effort?: string;
 }
 
 export interface DalleRequestPayload {
@@ -200,7 +251,7 @@ export class ChatGPTApi implements LLMApi {
       options.config.model.startsWith("o1") ||
       options.config.model.startsWith("o3") ||
       options.config.model.startsWith("o4-mini");
-    const isGpt5 =  options.config.model.startsWith("gpt-5");
+    const isGpt5 = options.config.model.startsWith("gpt-5");
     if (isDalle3) {
       const prompt = getMessageTextContent(
         options.messages.slice(-1)?.pop() as any,
@@ -231,7 +282,7 @@ export class ChatGPTApi implements LLMApi {
         messages,
         stream: options.config.stream,
         model: modelConfig.model,
-        temperature: (!isO1OrO3 && !isGpt5) ? modelConfig.temperature : 1,
+        temperature: !isO1OrO3 && !isGpt5 ? modelConfig.temperature : 1,
         presence_penalty: !isO1OrO3 ? modelConfig.presence_penalty : 0,
         frequency_penalty: !isO1OrO3 ? modelConfig.frequency_penalty : 0,
         top_p: !isO1OrO3 ? modelConfig.top_p : 1,
@@ -240,29 +291,31 @@ export class ChatGPTApi implements LLMApi {
       };
 
       if (isGpt5) {
-  	// Remove max_tokens if present
-  	delete requestPayload.max_tokens;
-  	// Add max_completion_tokens (or max_completion_tokens if that's what you meant)
-  	requestPayload["max_completion_tokens"] = modelConfig.max_tokens;
-
+        // Remove max_tokens if present
+        delete requestPayload.max_tokens;
+        // Add max_completion_tokens (or max_completion_tokens if that's what you meant)
+        requestPayload["max_completion_tokens"] = modelConfig.max_tokens;
       } else if (isO1OrO3) {
-        // by default the o1/o3 models will not attempt to produce output that includes markdown formatting
-        // manually add "Formatting re-enabled" developer message to encourage markdown inclusion in model responses
-        // (https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/reasoning?tabs=python-secure#markdown-output)
-        requestPayload["messages"].unshift({
-          role: "developer",
-          content: "Formatting re-enabled",
-        });
-
         // o1/o3 uses max_completion_tokens to control the number of tokens (https://platform.openai.com/docs/guides/reasoning#controlling-costs)
         requestPayload["max_completion_tokens"] = modelConfig.max_tokens;
       }
 
-
       // add max_tokens to vision model
-      if (visionModel && !isO1OrO3 && ! isGpt5) {
+      if (visionModel && !isO1OrO3 && !isGpt5) {
         requestPayload["max_tokens"] = Math.max(modelConfig.max_tokens, 4000);
       }
+
+      // patch
+      // ---
+      // by default the o1/o3 models will not attempt to produce output that includes markdown formatting
+      // manually add "Formatting re-enabled" developer message to encourage markdown inclusion in model responses
+      // (https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/reasoning?tabs=python-secure#markdown-output)
+      requestPayload["messages"].unshift({
+        role: "developer",
+        content: developerMessage,
+      });
+      // ---
+      requestPayload["reasoning_effort"] = "high";
     }
 
     console.log("[Request] openai payload: ", requestPayload);
