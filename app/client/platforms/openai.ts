@@ -70,6 +70,7 @@ All output **must** be formatted using clear and consistent Markdown, including 
 ### Additional Developer Guidelines
 
 - **API Usage:** Do **not** make up or invent APIs. Always reference valid and existing APIs to ensure reliability.
+- **Module System Preference:** Always prefer the **ES6 module system** using \`import\` / \`export\` for all TypeScript and JavaScript examples. Avoid CommonJS (\`require\`, \`module.exports\`) unless explicitly required by the user.
 - **Arrow Functions Requirement:** For all TypeScript/JavaScript examples, always use arrow functions.
 - Always follow these formatting rules, regardless of user phrasing.
 
