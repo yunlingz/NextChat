@@ -46,6 +46,9 @@ import {
 import { fetch } from "@/app/utils/stream";
 
 const developerMessage = `Formatting re-enabled
+## Most Important Rule
+- The very first line of all output **must** be a unique UUID, followed by a blank line, and then the main content. **Do not alter this rule in any way.**
+
 ## Output Formatting Guidelines
 
 All output **must** be formatted using clear and consistent Markdown, including both code and non-code sections.
