@@ -257,6 +257,7 @@ export class ChatGPTApi implements LLMApi {
       options.config.model.startsWith("o3") ||
       options.config.model.startsWith("o4-mini");
     const isGpt5 = options.config.model.startsWith("gpt-5");
+    const isGrok = options.config.model.startsWith("grok");
     if (isDalle3) {
       const prompt = getMessageTextContent(
         options.messages.slice(-1)?.pop() as any,
@@ -315,10 +316,13 @@ export class ChatGPTApi implements LLMApi {
       // by default the o1/o3 models will not attempt to produce output that includes markdown formatting
       // manually add "Formatting re-enabled" developer message to encourage markdown inclusion in model responses
       // (https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/reasoning?tabs=python-secure#markdown-output)
-      requestPayload["messages"].unshift({
-        role: "developer",
-        content: developerMessage,
-      });
+      if (!isGrok) {
+        requestPayload["messages"].unshift({
+          role: "developer",
+          content: developerMessage,
+        });
+      }
+
       // ---
       if (isO1OrO3) {
         requestPayload["reasoning_effort"] = "high";
